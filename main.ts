@@ -1,26 +1,42 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { exec } from 'child_process';
+import {
+	ItemView,
+	WorkspaceLeaf,
+	App,
+	Editor,
+	MarkdownView,
+	Modal,
+	Notice,
+	Plugin,
+	PluginSettingTab,
+	Setting,
+    FileSystemAdapter,
+} from 'obsidian';
+import { stdout } from 'process';
 
-// Remember to rename these classes and interfaces!
+export const VIEW_TYPE_THINGS3 = "things3-view";
 
-interface MyPluginSettings {
-	mySetting: string;
+interface ObsidianThings3Settings {
+	things3Token: string;
 }
 
-const DEFAULT_SETTINGS: MyPluginSettings = {
-	mySetting: 'default'
+const DEFAULT_SETTINGS: ObsidianThings3Settings = {
+	things3Token: ''
 }
 
-export default class MyPlugin extends Plugin {
-	settings: MyPluginSettings;
+export default class ObsidianThings3 extends Plugin {
+	settings: ObsidianThings3Settings;
 
 	async onload() {
 		await this.loadSettings();
+		// console.log(this.settings.things3Token)
 
 		// This creates an icon in the left ribbon.
-		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
+		const ribbonIconEl = this.addRibbonIcon('dice', 'open today list', (evt: MouseEvent) => {
 			// Called when the user clicks the icon.
-			new Notice('This is a notice!');
+			new Notice('comming soon...');
 		});
+
 		// Perform additional things with the ribbon
 		ribbonIconEl.addClass('my-plugin-ribbon-class');
 
@@ -70,12 +86,23 @@ export default class MyPlugin extends Plugin {
 
 		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
 		// Using this function will automatically remove the event listener when this plugin is disabled.
-		this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
-			console.log('click', evt);
-		});
+		// this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
+		// 	console.log('click', evt);
+		// });
 
 		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
 		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
+
+		this.registerView(
+			VIEW_TYPE_THINGS3,
+			(leaf) => new ExampleView(leaf)
+		);
+
+		this.addRibbonIcon("dice", "Activate view", () => {
+			this.activateThings3View();
+		});
+
+
 	}
 
 	onunload() {
@@ -89,6 +116,22 @@ export default class MyPlugin extends Plugin {
 	async saveSettings() {
 		await this.saveData(this.settings);
 	}
+
+
+	async activateThings3View() {
+		this.app.workspace.detachLeavesOfType(VIEW_TYPE_THINGS3);
+
+		await this.app.workspace.getRightLeaf(false).setViewState({
+			type: VIEW_TYPE_THINGS3,
+			active: true,
+		});
+
+		this.app.workspace.revealLeaf(
+			this.app.workspace.getLeavesOfType(VIEW_TYPE_THINGS3)[0]
+		);
+	}
+
+
 }
 
 class SampleModal extends Modal {
@@ -108,9 +151,9 @@ class SampleModal extends Modal {
 }
 
 class SampleSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
+	plugin: ObsidianThings3;
 
-	constructor(app: App, plugin: MyPlugin) {
+	constructor(app: App, plugin: ObsidianThings3) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
@@ -121,14 +164,65 @@ class SampleSettingTab extends PluginSettingTab {
 		containerEl.empty();
 
 		new Setting(containerEl)
-			.setName('Setting #1')
-			.setDesc('It\'s a secret')
+			.setName('token')
+			.setDesc('The token to send when making requests to the API, otherwise this tool can not modify your todo')
 			.addText(text => text
-				.setPlaceholder('Enter your secret')
-				.setValue(this.plugin.settings.mySetting)
+				.setPlaceholder('input token')
+				.setValue(this.plugin.settings.things3Token)
 				.onChange(async (value) => {
-					this.plugin.settings.mySetting = value;
+					this.plugin.settings.things3Token = value;
 					await this.plugin.saveSettings();
 				}));
 	}
+}
+
+
+export class ExampleView extends ItemView {
+	constructor(leaf: WorkspaceLeaf) {
+		super(leaf);
+	}
+
+	getViewType() {
+		return VIEW_TYPE_THINGS3;
+	}
+
+	getDisplayText() {
+		return "Things3";
+	}
+
+	async onOpen() {
+		const container = this.containerEl.children[1];
+		container.empty();
+		container.createEl("h4", {text: "Things3"});
+        
+        // get today List
+        const relativePath = this.getAbsolutePath('scpt/things.js')
+        console.log(relativePath)
+        exec(`osascript ${relativePath} showToDos TMTodayListSource`, (err, stdout, stderr) => {
+            const rawHtml = stdout
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(rawHtml, 'text/html')
+            const node = doc.documentElement
+            container.appendChild(node)
+        })
+	}
+
+	async onClose() {
+		// Nothing to clean up.
+	}
+
+    getAbsolutePath(fileName: string): string {
+        let basePath;
+        let relativePath;
+        // base path
+        if (this.app.vault.adapter instanceof FileSystemAdapter) {
+            basePath = this.app.vault.adapter.getBasePath();
+        } else {
+            throw new Error('Cannot determine base path.');
+        }
+        // relative path
+        relativePath = `${this.app.vault.configDir}/plugins/obsidian-things3/${fileName}`;
+        // absolute path
+        return `${basePath}/${relativePath}`;
+    }
 }
