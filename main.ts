@@ -245,6 +245,15 @@ export class ExampleView extends ItemView {
         container.createEl("br");
         container.createEl("br");
 
+        const button = document.createElement("button")
+        button.innerText = "refresh"
+
+        button.addEventListener("click", () => {
+            this.refreshTodayView(0)
+        })
+
+        container.appendChild(button)
+
         // add click event
         const inputCheckboxes = node.querySelectorAll('.things-today-checkbox');
         inputCheckboxes.forEach((checkbox) => {
@@ -271,7 +280,11 @@ export class ExampleView extends ItemView {
     refreshTodayView(delay?: number) {
         clearTimeout(this.refreshTimer)
 
-        this.refreshTimer = setTimeout(() => {this.getAndShowTodayTodos(); console.log("refresh today view, delay: " + delay)}, delay);
+        this.refreshTimer = setTimeout(() => {
+            this.getAndShowTodayTodos();
+            console.log("refresh today view, delay: " + delay)
+            new Notice("Today Refreshed")
+        }, delay);
     }
 
     executeThingsJXA(argv: string): Promise<string> {
