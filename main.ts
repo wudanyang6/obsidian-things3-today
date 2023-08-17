@@ -249,7 +249,7 @@ export class ExampleView extends ItemView {
         button.innerText = "refresh"
 
         button.addEventListener("click", () => {
-            this.refreshTodayView(0)
+            this.refreshTodayView(0, true)
         })
 
         container.appendChild(button)
@@ -277,13 +277,15 @@ export class ExampleView extends ItemView {
         this.refreshTodayView(3000)
     }
 
-    refreshTodayView(delay?: number) {
+    refreshTodayView(delay?: number, notice = false) {
         clearTimeout(this.refreshTimer)
 
         this.refreshTimer = setTimeout(() => {
             this.getAndShowTodayTodos();
             console.log("refresh today view, delay: " + delay)
-            new Notice("Today Refreshed")
+            if (notice) {
+                new Notice("Today Refreshed")
+            }
         }, delay);
     }
 
