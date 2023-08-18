@@ -34,13 +34,13 @@ export default class ObsidianThings3 extends Plugin {
         // console.log(this.settings.things3Token)
 
         // This creates an icon in the left ribbon.
-        const ribbonIconEl = this.addRibbonIcon('dice', 'open today list', (evt: MouseEvent) => {
-            // Called when the user clicks the icon.
-            new Notice('comming soon...');
-        });
+        // const ribbonIconEl = this.addRibbonIcon('dice', 'open today list', (evt: MouseEvent) => {
+        //     // Called when the user clicks the icon.
+        //     new Notice('comming soon...');
+        // });
 
         // Perform additional things with the ribbon
-        ribbonIconEl.addClass('my-plugin-ribbon-class');
+        // ribbonIconEl.addClass('my-plugin-ribbon-class');
 
         // This adds a status bar item to the bottom of the app. Does not work on mobile apps.
         const statusBarItemEl = this.addStatusBarItem();
@@ -100,7 +100,7 @@ export default class ObsidianThings3 extends Plugin {
             (leaf) => new ExampleView(leaf)
         );
 
-        this.addRibbonIcon("dice", "Activate view", () => {
+        this.addRibbonIcon("pencil", "Activate view", () => {
             this.activateThings3View();
         });
 
@@ -241,7 +241,7 @@ export class ExampleView extends ItemView {
 
         container.empty();
         container.createEl("h4", { text: "Things3 Todays" });
-        container.createEl("a", { href: "things:///show?id=today", text: "Goto Today" });
+        container.createEl("a", { href: "things:///show?id=today", text: "Today" });
         container.createEl("br");
         container.createEl("br");
 
