@@ -181,7 +181,7 @@ class SampleSettingTab extends PluginSettingTab {
 
 export class ExampleView extends ItemView {
     intervalValue: NodeJS.Timer;
-    refreshTimer
+    refreshTimer: NodeJS.Timer
     
     constructor(leaf: WorkspaceLeaf) {
         super(leaf);
@@ -270,7 +270,7 @@ export class ExampleView extends ItemView {
     async handleCheckboxClick(event: MouseEvent) {
         const clickedCheckbox = event.target as HTMLInputElement;
 
-        this.executeThingsJXA("complete " + clickedCheckbox.attributes.tid.value)
+        this.executeThingsJXA("complete " + clickedCheckbox.attributes.getNamedItem("tid")?.value)
 
         clickedCheckbox.parentNode?.detach()
 
@@ -291,7 +291,7 @@ export class ExampleView extends ItemView {
 
     executeThingsJXA(argv: string): Promise<string> {
         // let output = ''
-        const relativePath = this.getAbsolutePath('scpt/things.js')
+        const relativePath = this.getAbsolutePath('things.js')
 
         return new Promise((resolve) => {
             exec(`osascript "${relativePath}" ${argv}`, (err, stdout, stderr) => {
