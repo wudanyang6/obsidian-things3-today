@@ -86,21 +86,12 @@ export default class ObsidianThings3 extends Plugin {
         // This adds a settings tab so the user can configure various aspects of the plugin
         this.addSettingTab(new SampleSettingTab(this.app, this));
 
-        // If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
-        // Using this function will automatically remove the event listener when this plugin is disabled.
-        // this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
-        // 	console.log('click', evt);
-        // });
-
-        // When registering intervals, this function will automatically clear the interval when the plugin is disabled.
-        // this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
-
         this.registerView(
             VIEW_TYPE_THINGS3,
-            (leaf) => new ExampleView(leaf)
+            (leaf) => new ThingsView(leaf)
         );
 
-        this.addRibbonIcon("pencil", "Activate view", () => {
+        this.addRibbonIcon("checkmark", "Activate view", () => {
             this.activateThings3View();
         });
 
@@ -179,7 +170,7 @@ class SampleSettingTab extends PluginSettingTab {
 }
 
 
-export class ExampleView extends ItemView {
+export class ThingsView extends ItemView {
     intervalValue: NodeJS.Timer;
     refreshTimer: NodeJS.Timer
     
@@ -189,7 +180,7 @@ export class ExampleView extends ItemView {
 
     getIcon(): string {
         // https://github.com/obsidianmd/obsidian-api/issues/3
-        return "pencil";
+        return "checkmark";
     }
 
     getViewType() {
