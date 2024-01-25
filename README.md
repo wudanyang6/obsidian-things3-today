@@ -31,6 +31,8 @@ Once the plugin is installed and enabled, you can view and interact with your To
 
 When interacting with Things3, a prompt may appear asking for permission to perform operations. You will need to click "Allow" to enable the plugin to communicate with Things3 and perform task updates.
 
+showcase: ![](showcase.gif)
+
 ## Configuration
 
 The current version of the plugin does not require any additional configuration.
