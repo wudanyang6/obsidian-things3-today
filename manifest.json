@@ -1,11 +1,10 @@
 {
-	"id": "obsidian-things3",
-	"name": "Things3 today In Obsidian",
+	"id": "obsidian-things3-today",
+	"name": "Things3 Today",
 	"version": "0.1.0",
 	"minAppVersion": "0.15.0",
-	"description": "things3 today list",
-	"author": "shaoxia",
+	"description": "things3 today list in obsidian panel",
+	"author": "wudanyang6",
 	"authorUrl": "https://wudanyang6.github.io/",
-	"fundingUrl": "https://obsidian.md/pricing",
 	"isDesktopOnly": true
 }

@@ -12,11 +12,12 @@ import {
     PluginSettingTab,
     Setting,
     FileSystemAdapter,
+    PluginManifest,
 } from 'obsidian';
 import { resolve } from 'path';
 import { stdout } from 'process';
 
-export const VIEW_TYPE_THINGS3 = "things3-view";
+export const VIEW_TYPE_THINGS3 = "things3-today";
 
 interface ObsidianThings3Settings {
     things3Token: string;
@@ -31,75 +32,31 @@ export default class ObsidianThings3 extends Plugin {
 
     async onload() {
         await this.loadSettings();
-        // console.log(this.settings.things3Token)
 
-        // This creates an icon in the left ribbon.
-        // const ribbonIconEl = this.addRibbonIcon('dice', 'open today list', (evt: MouseEvent) => {
-        //     // Called when the user clicks the icon.
-        //     new Notice('comming soon...');
-        // });
-
-        // Perform additional things with the ribbon
-        // ribbonIconEl.addClass('my-plugin-ribbon-class');
-
-        // This adds a status bar item to the bottom of the app. Does not work on mobile apps.
-        const statusBarItemEl = this.addStatusBarItem();
-        statusBarItemEl.setText('Status Bar Text');
-
-        // This adds a simple command that can be triggered anywhere
         this.addCommand({
-            id: 'open-sample-modal-simple',
-            name: 'Open sample modal (simple)',
+            id: 'open-today',
+            name: 'Open Today',
             callback: () => {
-                new SampleModal(this.app).open();
+                this.activateThings3View();
             }
         });
-        // This adds an editor command that can perform some operation on the current editor instance
-        this.addCommand({
-            id: 'sample-editor-command',
-            name: 'Sample editor command',
-            editorCallback: (editor: Editor, view: MarkdownView) => {
-                // console.log(editor.getSelection());
-                editor.replaceSelection('Sample Editor Command');
-            }
-        });
-        // This adds a complex command that can check whether the current state of the app allows execution of the command
-        this.addCommand({
-            id: 'open-sample-modal-complex',
-            name: 'Open sample modal (complex)',
-            checkCallback: (checking: boolean) => {
-                // Conditions to check
-                const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
-                if (markdownView) {
-                    // If checking is true, we're simply "checking" if the command can be run.
-                    // If checking is false, then we want to actually perform the operation.
-                    if (!checking) {
-                        new SampleModal(this.app).open();
-                    }
-
-                    // This command will only show up in Command Palette when the check function returns true
-                    return true;
-                }
-            }
-        });
-
-        // This adds a settings tab so the user can configure various aspects of the plugin
-        this.addSettingTab(new SampleSettingTab(this.app, this));
 
         this.registerView(
             VIEW_TYPE_THINGS3,
-            (leaf) => new ThingsView(leaf)
+            (leaf) => new ThingsView(leaf, this.manifest)
         );
 
-        this.addRibbonIcon("checkmark", "Activate view", () => {
+        this.addRibbonIcon("check-square", "Open Things3 Today", () => {
             this.activateThings3View();
         });
 
-
+        this.activateThings3View();
     }
 
     onunload() {
-
+        this.app.workspace
+        .getLeavesOfType(VIEW_TYPE_THINGS3)
+        .forEach((leaf) => leaf.detach()); 
     }
 
     async loadSettings() {
@@ -127,60 +84,19 @@ export default class ObsidianThings3 extends Plugin {
 
 }
 
-class SampleModal extends Modal {
-    constructor(app: App) {
-        super(app);
-    }
-
-    onOpen() {
-        const { contentEl } = this;
-        contentEl.setText('Woah!');
-    }
-
-    onClose() {
-        const { contentEl } = this;
-        contentEl.empty();
-    }
-}
-
-class SampleSettingTab extends PluginSettingTab {
-    plugin: ObsidianThings3;
-
-    constructor(app: App, plugin: ObsidianThings3) {
-        super(app, plugin);
-        this.plugin = plugin;
-    }
-
-    display(): void {
-        const { containerEl } = this;
-
-        containerEl.empty();
-
-        new Setting(containerEl)
-            .setName('token')
-            .setDesc('The token to send when making requests to the API, otherwise this tool can not modify your todo')
-            .addText(text => text
-                .setPlaceholder('input token')
-                .setValue(this.plugin.settings.things3Token)
-                .onChange(async (value) => {
-                    this.plugin.settings.things3Token = value;
-                    await this.plugin.saveSettings();
-                }));
-    }
-}
-
-
 export class ThingsView extends ItemView {
     intervalValue: NodeJS.Timer;
     refreshTimer: NodeJS.Timer
+    manifest: PluginManifest
     
-    constructor(leaf: WorkspaceLeaf) {
+    constructor(leaf: WorkspaceLeaf, manifest: PluginManifest) {
         super(leaf);
+        this.manifest = manifest
     }
 
     getIcon(): string {
         // https://github.com/obsidianmd/obsidian-api/issues/3
-        return "checkmark";
+        return "check-square";
     }
 
     getViewType() {
@@ -188,7 +104,7 @@ export class ThingsView extends ItemView {
     }
 
     getDisplayText() {
-        return "Things3";
+        return "Things3 Today";
     }
 
     async onOpen() {
@@ -213,8 +129,9 @@ export class ThingsView extends ItemView {
         } else {
             throw new Error('Cannot determine base path.');
         }
+
         // relative path
-        relativePath = `${this.app.vault.configDir}/plugins/obsidian-things3/${fileName}`;
+        relativePath = `${this.app.vault.configDir}/plugins/${this.manifest.id}/${fileName}`;
         // absolute path
         return `${basePath}/${relativePath}`;
     }
@@ -231,15 +148,16 @@ export class ThingsView extends ItemView {
         const node = doc.documentElement
 
         container.empty();
-        container.createEl("h4", { text: "Things3 Todays" });
-        container.createEl("a", { href: "things:///show?id=today", text: "Today" });
+        container.createEl("h4", { text: "Things3 Today" });
+        container.createEl("a", { href: "things:///show?id=today", text: "Open Today" });
         container.createEl("br");
         container.createEl("br");
 
         const button = document.createElement("button")
-        button.innerText = "refresh"
+        button.innerText = "Refresh"
 
         button.addEventListener("click", () => {
+            // Notifications will only be displayed if the button is clicked.
             this.refreshTodayView(0, true)
         })
 
@@ -265,6 +183,7 @@ export class ThingsView extends ItemView {
 
         clickedCheckbox.parentNode?.detach()
 
+        // things3 is too slow to refresh this immediately
         this.refreshTodayView(3000)
     }
 
@@ -273,7 +192,7 @@ export class ThingsView extends ItemView {
 
         this.refreshTimer = setTimeout(() => {
             this.getAndShowTodayTodos();
-            console.log("refresh today view, delay: " + delay)
+            console.log("refresh things3 today view, delay: " + delay)
             if (notice) {
                 new Notice("Today Refreshed")
             }
