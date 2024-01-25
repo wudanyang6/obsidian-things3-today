@@ -42,8 +42,8 @@ The current version of the plugin does not require any additional configuration.
 
 If you encounter any issues or need assistance, please reach out through:
 
-- GitHub Issue Tracker: [Link to your GitHub repository's issues page]
-- Email: [Your email address]
+- GitHub Issue Tracker: https://github.com/wudanyang6/obsidian-things3-today/issues
+- Email: wu.danyang@qq.com
 
 Feedback and suggestions are always welcome!
 
