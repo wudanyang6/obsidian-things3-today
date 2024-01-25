@@ -121,7 +121,6 @@ export class ThingsView extends ItemView {
         }
 
         // relative path
-        console.log(this.manifest.id)
         relativePath = `${this.app.vault.configDir}/plugins/${this.manifest.id}/${fileName}`;
         // absolute path
         return `${basePath}/${relativePath}`;
@@ -183,7 +182,7 @@ export class ThingsView extends ItemView {
 
         this.refreshTimer = setTimeout(() => {
             this.getAndShowTodayTodos();
-            console.log("refresh things3 today view, delay: " + delay)
+            // console.log("refresh things3 today view, delay: " + delay)
             if (notice) {
                 new Notice("Today Refreshed")
             }
