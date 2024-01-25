@@ -1,22 +1,53 @@
-# Install
+# Obsidian Things3 Today Plugin
 
-download this respository, and run the following command in the root directory of this repository:
+## Introduction
 
-```bash
-npm run build
-```
+The Obsidian Things3 Today Plugin allows you to view and manage your today's tasks from the Things3 app directly within an Obsidian pane. This plugin is designed to help you seamlessly integrate task management with your note-taking workflow in Obsidian.
 
-copy the generated `main.js` and `things.js` to `${vault}/.obsidian/plugins/obsidian-things/`
+## Features
 
-reload the obsidian, and enable the plugin in the settings.
+- Displays your Today list from Things3 within Obsidian
+- Supports marking tasks as complete with a single click
+- Clean and simple user interface for seamless integration
 
-# Usage
+## Installation
 
-show todo list in the sidebar 
+1. Open Settings in Obsidian.
+2. Navigate to the "Community Plugins" section.
+3. Click on "Browse" and search for "Obsidian Things3 Today Plugin".
+4. Find the plugin and click "Install".
+5. Once installed, enable the plugin from the list of installed plugins.
 
-![](./show.png)
+Please ensure that you have Things3 installed and running on your device.
 
-1. click the todo item to open the corresponding note in things
-2. click the checkbox to mark the todo item as done 
-3. click the refresh button to refresh the todo list
-4. click the today button to show the todo list of today in things
+## Usage
+
+Once the plugin is installed and enabled, you can view and interact with your Today tasks by following these steps:
+
+1. Click on the "Open Things3 Today" button in the side bar.
+2. Your Today task list will be displayed in the pane.
+3. Click the checkbox next to any task to mark it as completed in Things3.
+4. Click the "Refresh" button to refresh your Today task list
+
+When interacting with Things3, a prompt may appear asking for permission to perform operations. You will need to click "Allow" to enable the plugin to communicate with Things3 and perform task updates.
+
+## Configuration
+
+The current version of the plugin does not require any additional configuration.
+
+## Support and Issue Reporting
+
+If you encounter any issues or need assistance, please reach out through:
+
+- GitHub Issue Tracker: [Link to your GitHub repository's issues page]
+- Email: [Your email address]
+
+Feedback and suggestions are always welcome!
+
+## Contributing
+
+If you would like to contribute code or suggestions to this plugin, please feel free to submit a Pull Request on GitHub or contact us directly.
+
+## License
+
+The Obsidian Things3 Today Plugin is released under the MIT LICENSE. For more information, please check the LICENSE file.
