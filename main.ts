@@ -31,7 +31,6 @@ export default class ObsidianThings3 extends Plugin {
     settings: ObsidianThings3Settings;
 
     async onload() {
-        await this.loadSettings();
 
         this.addCommand({
             id: 'open-today',
@@ -58,15 +57,6 @@ export default class ObsidianThings3 extends Plugin {
         .getLeavesOfType(VIEW_TYPE_THINGS3)
         .forEach((leaf) => leaf.detach()); 
     }
-
-    async loadSettings() {
-        this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
-    }
-
-    async saveSettings() {
-        await this.saveData(this.settings);
-    }
-
 
     async activateThings3View() {
         this.app.workspace.detachLeavesOfType(VIEW_TYPE_THINGS3);
@@ -131,6 +121,7 @@ export class ThingsView extends ItemView {
         }
 
         // relative path
+        console.log(this.manifest.id)
         relativePath = `${this.app.vault.configDir}/plugins/${this.manifest.id}/${fileName}`;
         // absolute path
         return `${basePath}/${relativePath}`;

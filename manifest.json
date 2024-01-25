@@ -1,7 +1,7 @@
 {
-	"id": "obsidian-things3-today",
+	"id": "things3-today",
 	"name": "Things3 Today",
-	"version": "0.1.0",
+	"version": "1.0.1",
 	"minAppVersion": "0.15.0",
 	"description": "things3 today list in obsidian",
 	"author": "wudanyang6",
