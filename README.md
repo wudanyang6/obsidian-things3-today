@@ -8,6 +8,7 @@ The Obsidian Things3 Today Plugin allows you to view and manage your today's tas
 
 - Displays your Today list from Things3 within Obsidian
 - Supports marking tasks as complete with a single click
+- Automatically refreshes the task list every 30 seconds to keep your view up to date.
 - Clean and simple user interface for seamless integration
 
 ## Installation
@@ -28,7 +29,6 @@ Once the plugin is installed and enabled, you can view and interact with your To
 2. Your Today task list will be displayed in the pane.
 3. Click the checkbox next to any task to mark it as completed in Things3.
 4. Click the "Refresh" button to refresh your Today task list
-5. Automatically refreshes the task list every 30 seconds to keep your view up to date.
 
 When interacting with Things3, a prompt may appear asking for permission to perform operations. You will need to click "Allow" to enable the plugin to communicate with Things3 and perform task updates.
 
