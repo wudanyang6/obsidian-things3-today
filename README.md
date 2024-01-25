@@ -28,6 +28,7 @@ Once the plugin is installed and enabled, you can view and interact with your To
 2. Your Today task list will be displayed in the pane.
 3. Click the checkbox next to any task to mark it as completed in Things3.
 4. Click the "Refresh" button to refresh your Today task list
+5. Automatically refreshes the task list every 30 seconds to keep your view up to date.
 
 When interacting with Things3, a prompt may appear asking for permission to perform operations. You will need to click "Allow" to enable the plugin to communicate with Things3 and perform task updates.
 
