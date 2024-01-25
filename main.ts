@@ -49,7 +49,9 @@ export default class ObsidianThings3 extends Plugin {
             this.activateThings3View();
         });
 
-        this.activateThings3View();
+        this.registerEvent(
+            this.app.workspace.on("layout-ready", this.activateThings3View.bind(this))
+        );
     }
 
     onunload() {
