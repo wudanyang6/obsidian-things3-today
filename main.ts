@@ -1,204 +1,188 @@
-import { exec } from 'child_process';
-import { clear } from 'console';
+import {exec} from 'child_process';
 import {
-    ItemView,
-    WorkspaceLeaf,
-    App,
-    Editor,
-    MarkdownView,
-    Modal,
-    Notice,
-    Plugin,
-    PluginSettingTab,
-    Setting,
-    FileSystemAdapter,
-    PluginManifest,
+	ItemView,
+	WorkspaceLeaf,
+	Notice,
+	Plugin,
+	FileSystemAdapter,
+	PluginManifest,
 } from 'obsidian';
-import { resolve } from 'path';
-import { stdout } from 'process';
 
 export const VIEW_TYPE_THINGS3 = "things3-today";
 
 interface ObsidianThings3Settings {
-    things3Token: string;
-}
-
-const DEFAULT_SETTINGS: ObsidianThings3Settings = {
-    things3Token: ''
+	things3Token: string;
 }
 
 export default class ObsidianThings3 extends Plugin {
-    settings: ObsidianThings3Settings;
+	settings: ObsidianThings3Settings;
 
-    async onload() {
+	async onload() {
 
-        this.addCommand({
-            id: 'open-today',
-            name: 'Open Today',
-            callback: () => {
-                this.activateThings3View();
-            }
-        });
+		this.addCommand({
+			id: 'open-today',
+			name: 'Open Today',
+			callback: () => {
+				this.activateThings3View();
+			}
+		});
 
-        this.registerView(
-            VIEW_TYPE_THINGS3,
-            (leaf) => new ThingsView(leaf, this.manifest)
-        );
+		this.registerView(
+			VIEW_TYPE_THINGS3,
+			(leaf) => new ThingsView(leaf, this.manifest)
+		);
 
-        this.addRibbonIcon("check-square", "Open Things3 Today", () => {
-            this.activateThings3View();
-        });
+		this.addRibbonIcon("check-square", "Open Things3 Today", () => {
+			this.activateThings3View();
+		});
 
-        this.registerEvent(
-            this.app.workspace.on("layout-ready", this.activateThings3View.bind(this))
-        );
-    }
+		this.app.workspace.onLayoutReady(this.activateThings3View.bind(this))
+	}
 
-    onunload() {
-        this.app.workspace
-        .getLeavesOfType(VIEW_TYPE_THINGS3)
-        .forEach((leaf) => leaf.detach()); 
-    }
+	onunload() {
+		this.app.workspace
+			.getLeavesOfType(VIEW_TYPE_THINGS3)
+			.forEach((leaf) => leaf.detach());
+	}
 
-    async activateThings3View() {
-        this.app.workspace.detachLeavesOfType(VIEW_TYPE_THINGS3);
+	async activateThings3View() {
+		this.app.workspace.detachLeavesOfType(VIEW_TYPE_THINGS3);
 
-        await this.app.workspace.getRightLeaf(false).setViewState({
-            type: VIEW_TYPE_THINGS3,
-            active: true,
-        });
+		await this.app.workspace.getRightLeaf(false).setViewState({
+			type: VIEW_TYPE_THINGS3,
+			active: true,
+		});
 
-        this.app.workspace.revealLeaf(
-            this.app.workspace.getLeavesOfType(VIEW_TYPE_THINGS3)[0]
-        );
-    }
+		this.app.workspace.revealLeaf(
+			this.app.workspace.getLeavesOfType(VIEW_TYPE_THINGS3)[0]
+		);
+	}
 
 
 }
 
 export class ThingsView extends ItemView {
-    intervalValue: NodeJS.Timer;
-    refreshTimer: NodeJS.Timer
-    manifest: PluginManifest
-    
-    constructor(leaf: WorkspaceLeaf, manifest: PluginManifest) {
-        super(leaf);
-        this.manifest = manifest
-    }
+	intervalValue: NodeJS.Timer;
+	refreshTimer: NodeJS.Timer
+	manifest: PluginManifest
 
-    getIcon(): string {
-        // https://github.com/obsidianmd/obsidian-api/issues/3
-        return "check-square";
-    }
+	constructor(leaf: WorkspaceLeaf, manifest: PluginManifest) {
+		super(leaf);
+		this.manifest = manifest
+	}
 
-    getViewType() {
-        return VIEW_TYPE_THINGS3;
-    }
+	getIcon(): string {
+		// https://github.com/obsidianmd/obsidian-api/issues/3
+		return "check-square";
+	}
 
-    getDisplayText() {
-        return "Things3 Today";
-    }
+	getViewType() {
+		return VIEW_TYPE_THINGS3;
+	}
 
-    async onOpen() {
-        this.refreshTodayView(0);
-        this.intervalValue = setInterval(() => {
-            this.refreshTodayView(0);
-        }, 1000 * 30);
-    }
+	getDisplayText() {
+		return "Things3 Today";
+	}
 
-    async onClose() {
-        // Nothing to clean up.
-        clearInterval(this.intervalValue);
-        clearTimeout(this.refreshTimer);
-    }
+	async onOpen() {
+		this.refreshTodayView(0);
+		this.intervalValue = setInterval(() => {
+			this.refreshTodayView(0);
+		}, 1000 * 30);
+	}
 
-    getAbsolutePath(fileName: string): string {
-        let basePath;
-        let relativePath;
-        // base path
-        if (this.app.vault.adapter instanceof FileSystemAdapter) {
-            basePath = this.app.vault.adapter.getBasePath();
-        } else {
-            throw new Error('Cannot determine base path.');
-        }
+	async onClose() {
+		// Nothing to clean up.
+		clearInterval(this.intervalValue);
+		clearTimeout(this.refreshTimer);
+	}
 
-        // relative path
-        relativePath = `${this.app.vault.configDir}/plugins/${this.manifest.id}/${fileName}`;
-        // absolute path
-        return `${basePath}/${relativePath}`;
-    }
+	getAbsolutePath(fileName: string): string {
+		let basePath;
+		// base path
+		if (this.app.vault.adapter instanceof FileSystemAdapter) {
+			basePath = this.app.vault.adapter.getBasePath();
+		} else {
+			throw new Error('Cannot determine base path.');
+		}
 
-    async getAndShowTodayTodos() {
-        const container = this.containerEl.children[1];
-        // get today List
-        const rawHtml = await this.executeThingsJXA('today')
-        const parser = new DOMParser();
-        // let cnode = document.createElement('ul').appendChild(document.createElement('ul'))
-        // cnode.outerHTML = rawHtml;
-        // console.log(cnode)
-        const doc = parser.parseFromString(rawHtml, 'text/html')
-        const node = doc.documentElement
+		// relative path
+		const relativePath = `${this.app.vault.configDir}/plugins/${this.manifest.id}/${fileName}`;
+		// absolute path
+		return `${basePath}/${relativePath}`;
+	}
 
-        container.empty();
-        container.createEl("h4", { text: "Things3 Today" });
-        container.createEl("a", { href: "things:///show?id=today", text: "Open Today" });
-        container.createEl("br");
-        container.createEl("br");
+	async getAndShowTodayTodos() {
+		const container = this.containerEl.children[1];
+		// get today List
+		const rawHtml = await this.executeThingsJXA('today')
+		const parser = new DOMParser();
+		// let cnode = document.createElement('ul').appendChild(document.createElement('ul'))
+		// cnode.outerHTML = rawHtml;
+		// console.log(cnode)
+		const doc = parser.parseFromString(rawHtml, 'text/html')
+		const node = doc.documentElement
 
-        const button = document.createElement("button")
-        button.innerText = "Refresh"
+		container.empty();
+		container.createEl("h4", {text: "Things3 Today"});
+		container.createEl("a", {href: "things:///show?id=today", text: "Open Today"});
+		container.createEl("br");
+		container.createEl("br");
 
-        button.addEventListener("click", () => {
-            // Notifications will only be displayed if the button is clicked.
-            this.refreshTodayView(0, true)
-        })
+		const button = document.createElement("button")
+		button.innerText = "Refresh"
 
-        container.appendChild(button)
+		button.addEventListener("click", () => {
+			// Notifications will only be displayed if the button is clicked.
+			this.refreshTodayView(0, true)
+		})
 
-        // add click event
-        const inputCheckboxes = node.querySelectorAll('.things-today-checkbox');
-        inputCheckboxes.forEach((checkbox) => {
-            // console.log(checkbox)
-            checkbox.addEventListener('click', this.handleCheckboxClick.bind(this));
-        });
+		container.appendChild(button)
 
-        // append body > subEle into container
-        while (node.children[1].children.length > 0) {
-            container.appendChild(node.children[1].children[0]);
-        }
-    }
+		// add click event
+		const inputCheckboxes = node.querySelectorAll('.things-today-checkbox');
+		inputCheckboxes.forEach((checkbox) => {
+			// console.log(checkbox)
+			checkbox.addEventListener('click', this.handleCheckboxClick.bind(this));
+		});
 
-    async handleCheckboxClick(event: MouseEvent) {
-        const clickedCheckbox = event.target as HTMLInputElement;
+		// append body > subEle into container
+		while (node.children[1].children.length > 0) {
+			container.appendChild(node.children[1].children[0]);
+		}
+	}
 
-        this.executeThingsJXA("complete " + clickedCheckbox.attributes.getNamedItem("tid")?.value)
+	async handleCheckboxClick(event: MouseEvent) {
+		const clickedCheckbox = event.target as HTMLInputElement;
 
-        clickedCheckbox.parentNode?.detach()
+		this.executeThingsJXA("complete " + clickedCheckbox.attributes.getNamedItem("tid")?.value)
 
-        // things3 is too slow to refresh this immediately
-        this.refreshTodayView(3000)
-    }
+		clickedCheckbox.parentNode?.detach()
 
-    refreshTodayView(delay?: number, notice = false) {
-        clearTimeout(this.refreshTimer)
+		// things3 is too slow to refresh this immediately
+		this.refreshTodayView(3000)
+	}
 
-        this.refreshTimer = setTimeout(() => {
-            this.getAndShowTodayTodos();
-            // console.log("refresh things3 today view, delay: " + delay)
-            if (notice) {
-                new Notice("Today Refreshed")
-            }
-        }, delay);
-    }
+	refreshTodayView(delay?: number, notice = false) {
+		clearTimeout(this.refreshTimer)
 
-    executeThingsJXA(argv: string): Promise<string> {
-        // let output = ''
-        const relativePath = this.getAbsolutePath('things.js')
+		this.refreshTimer = setTimeout(() => {
+			this.getAndShowTodayTodos();
+			// console.log("refresh things3 today view, delay: " + delay)
+			if (notice) {
+				new Notice("Today Refreshed")
+			}
+		}, delay);
+	}
 
-        return new Promise((resolve) => {
-            exec(`osascript "${relativePath}" ${argv}`, (err, stdout, stderr) => {
-                resolve(stdout)
-            })
-        })
-    }
+	executeThingsJXA(argv: string): Promise<string> {
+		// let output = ''
+		const relativePath = this.getAbsolutePath('things.js')
+
+		return new Promise((resolve) => {
+			exec(`osascript "${relativePath}" ${argv}`, (err, stdout, stderr) => {
+				resolve(stdout)
+			})
+		})
+	}
 }
