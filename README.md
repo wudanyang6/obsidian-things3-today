@@ -1,8 +1,8 @@
-# Obsidian Things3 Today Plugin
+# Things3 Today Plugin
 
 ## Introduction
 
-The Obsidian Things3 Today Plugin allows you to view and manage your today's tasks from the Things3 app directly within an Obsidian pane. This plugin is designed to help you seamlessly integrate task management with your note-taking workflow in Obsidian.
+The Things3 Today Plugin allows you to view and manage your today's tasks from the Things3 app directly within an Obsidian pane. This plugin is designed to help you seamlessly integrate task management with your note-taking workflow in Obsidian.
 
 ## Features
 
@@ -15,7 +15,7 @@ The Obsidian Things3 Today Plugin allows you to view and manage your today's tas
 
 1. Open Settings in Obsidian.
 2. Navigate to the "Community Plugins" section.
-3. Click on "Browse" and search for "Obsidian Things3 Today Plugin".
+3. Click on "Browse" and search for "Things3 Today Plugin".
 4. Find the plugin and click "Install".
 5. Once installed, enable the plugin from the list of installed plugins.
 
@@ -53,4 +53,4 @@ If you would like to contribute code or suggestions to this plugin, please feel 
 
 ## License
 
-The Obsidian Things3 Today Plugin is released under the MIT LICENSE. For more information, please check the LICENSE file.
+The Things3 Today Plugin is released under the MIT LICENSE. For more information, please check the LICENSE file.
