@@ -1,6 +1,6 @@
 {
 	"name": "things3-today",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "show and manipulate things3 today list in obsidian panel",
 	"main": "main.js",
 	"scripts": {
