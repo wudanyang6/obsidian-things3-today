@@ -34,6 +34,8 @@ export default class ObsidianThings3 extends Plugin {
 	}
 
 	async activateThings3View() {
+		this.app.workspace.detachLeavesOfType(VIEW_TYPE_THINGS3);
+
 		await this.app.workspace.getRightLeaf(false).setViewState({
 			type: VIEW_TYPE_THINGS3,
 			active: true,
@@ -43,7 +45,6 @@ export default class ObsidianThings3 extends Plugin {
 			this.app.workspace.getLeavesOfType(VIEW_TYPE_THINGS3)[0]
 		);
 	}
-
 
 }
 
