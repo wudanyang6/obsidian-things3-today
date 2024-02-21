@@ -79,7 +79,6 @@ export class ThingsView extends ItemView {
 	}
 
 	async onClose() {
-		// Nothing to clean up.
 		clearInterval(this.intervalValue);
 		clearTimeout(this.refreshTimer);
 	}
