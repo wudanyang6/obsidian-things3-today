@@ -4,18 +4,12 @@ import {
 	WorkspaceLeaf,
 	Notice,
 	Plugin,
-	FileSystemAdapter,
 	PluginManifest,
 } from 'obsidian';
 
 export const VIEW_TYPE_THINGS3 = "things3-today";
 
-interface ObsidianThings3Settings {
-	things3Token: string;
-}
-
 export default class ObsidianThings3 extends Plugin {
-	settings: ObsidianThings3Settings;
 
 	async onload() {
 
@@ -39,15 +33,7 @@ export default class ObsidianThings3 extends Plugin {
 		this.app.workspace.onLayoutReady(this.activateThings3View.bind(this))
 	}
 
-	onunload() {
-		this.app.workspace
-			.getLeavesOfType(VIEW_TYPE_THINGS3)
-			.forEach((leaf) => leaf.detach());
-	}
-
 	async activateThings3View() {
-		this.app.workspace.detachLeavesOfType(VIEW_TYPE_THINGS3);
-
 		await this.app.workspace.getRightLeaf(false).setViewState({
 			type: VIEW_TYPE_THINGS3,
 			active: true,
@@ -97,29 +83,11 @@ export class ThingsView extends ItemView {
 		clearTimeout(this.refreshTimer);
 	}
 
-	getAbsolutePath(fileName: string): string {
-		let basePath;
-		// base path
-		if (this.app.vault.adapter instanceof FileSystemAdapter) {
-			basePath = this.app.vault.adapter.getBasePath();
-		} else {
-			throw new Error('Cannot determine base path.');
-		}
-
-		// relative path
-		const relativePath = `${this.app.vault.configDir}/plugins/${this.manifest.id}/${fileName}`;
-		// absolute path
-		return `${basePath}/${relativePath}`;
-	}
-
 	async getAndShowTodayTodos() {
 		const container = this.containerEl.children[1];
 		// get today List
-		const rawHtml = await this.executeThingsJXA('today')
+		const rawHtml = await this.getTodayListByJXA()
 		const parser = new DOMParser();
-		// let cnode = document.createElement('ul').appendChild(document.createElement('ul'))
-		// cnode.outerHTML = rawHtml;
-		// console.log(cnode)
 		const doc = parser.parseFromString(rawHtml, 'text/html')
 		const node = doc.documentElement
 
@@ -155,7 +123,8 @@ export class ThingsView extends ItemView {
 	async handleCheckboxClick(event: MouseEvent) {
 		const clickedCheckbox = event.target as HTMLInputElement;
 
-		this.executeThingsJXA("complete " + clickedCheckbox.attributes.getNamedItem("tid")?.value)
+		const todoId = clickedCheckbox.attributes.getNamedItem("tid")?.value || ""
+		await this.completeTodoByJXA(todoId)
 
 		clickedCheckbox.parentNode?.detach()
 
@@ -168,19 +137,27 @@ export class ThingsView extends ItemView {
 
 		this.refreshTimer = setTimeout(() => {
 			this.getAndShowTodayTodos();
-			// console.log("refresh things3 today view, delay: " + delay)
 			if (notice) {
 				new Notice("Today Refreshed")
 			}
 		}, delay);
 	}
 
-	executeThingsJXA(argv: string): Promise<string> {
-		// let output = ''
-		const relativePath = this.getAbsolutePath('things.js')
+	getTodayListByJXA(): Promise<string> {
+		const getTodayListSct = `"function getTodayList() { let content = ''; Application('Things').lists.byId('TMTodayListSource').toDos().forEach(t => { content += '<ul><input type="checkbox" class="things-today-checkbox" tid=\\"' + t.id() + '\\"><div style="display:contents"><a href=\\"things:///show?id=' + t.id() + '\\">' + t.name() + '</a></div></ul>'; }); return content; }; getTodayList();"`
 
 		return new Promise((resolve) => {
-			exec(`osascript "${relativePath}" ${argv}`, (err, stdout, stderr) => {
+			exec(`osascript -l JavaScript -e ` + getTodayListSct, (err, stdout, stderr) => {
+				resolve(stdout)
+			})
+		})
+	}
+
+	completeTodoByJXA(todoId: string): Promise<string> {
+		const completeSct = `"Application('Things').toDos.byId('`+todoId+`').status = 'completed'"`
+
+		return new Promise((resolve) => {
+			exec(`osascript -l JavaScript -e ` + completeSct, (err, stdout, stderr) => {
 				resolve(stdout)
 			})
 		})
