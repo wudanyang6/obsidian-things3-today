@@ -34,16 +34,18 @@ export default class ObsidianThings3 extends Plugin {
 	}
 
 	async activateThings3View() {
-		this.app.workspace.detachLeavesOfType(VIEW_TYPE_THINGS3);
+        const { workspace } = this.app;
 
-		await this.app.workspace.getRightLeaf(false).setViewState({
-			type: VIEW_TYPE_THINGS3,
-			active: true,
-		});
+        let leaf: WorkspaceLeaf | null = null;
+        const leaves = workspace.getLeavesOfType(VIEW_TYPE_THINGS3);
+        if (leaves.length > 0) {
+            leaf = leaves[0];
+        } else {
+            leaf = workspace.getRightLeaf(false);
+            await leaf.setViewState({ type: VIEW_TYPE_THINGS3, active: true });
+        }
 
-		this.app.workspace.revealLeaf(
-			this.app.workspace.getLeavesOfType(VIEW_TYPE_THINGS3)[0]
-		);
+        workspace.revealLeaf(leaf);
 	}
 
 }
