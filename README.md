@@ -15,7 +15,7 @@ The Things3 Today Plugin allows you to view and manage your today's tasks from t
 
 1. Open Settings in Obsidian.
 2. Navigate to the "Community Plugins" section.
-3. Click on "Browse" and search for "Things3 Today Plugin".
+3. Click on "Browse" and search for "Things3 Today".
 4. Find the plugin and click "Install".
 5. Once installed, enable the plugin from the list of installed plugins.
 
